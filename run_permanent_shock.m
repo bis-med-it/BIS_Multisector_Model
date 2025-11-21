@@ -85,9 +85,9 @@ SET_baseline = SET;
 %% Find the country-specific shock parameter value to pass
 min_target_name = {'tau_c_(2)'};
 min_target_value = 0.25;
-fun = @(x)golden_search(x,SET_baseline, min_target_value, min_target_name);
+fun = @(x)golden_search(selected_targets{1},x,SET_baseline, min_target_value, min_target_name);
 x_end = fminbnd(fun,0.0000001,2.0);
-res_dist = golden_search(x_end,SET_baseline, min_target_value, min_target_name);
+res_dist = golden_search(selected_targets{1},x_end,SET_baseline, min_target_value, min_target_name);
 permanent_shock_value = x_end;
 
 
