@@ -1,4 +1,4 @@
-function res_dist = golden_search(x_int,SET_baseline, min_target_value, min_target_name)
+function res_dist = golden_search(x_target, x_int,SET_baseline, min_target_value, min_target_name)
 
 SET = SET_baseline;
 
@@ -31,5 +31,5 @@ ss_params_update = calc_ss(SET) ;
 ss_update = update_steady_state(SET,ss_params_update) ;
 %SET.ss = ss_update ;
 
-res_dist = (log(ss_update.gam_(2)) - min_target_value)^2;
+eval(strcat("res_dist = (log(ss_update.",strjoin(regexp(x_target, '[a-zA-Z_]+', 'match')),"(",regexp(x_target, '\d+', 'match'),")) - min_target_value)^2;"));
 end
