@@ -19,7 +19,7 @@ function t_factors = f_factor_shares(folder_path,mapping_file,source,industry_na
     var_codes_us_factors = readtable(mapping_file, 'Sheet', 'IO_VariableCodes_BEA');
     t_us_factors = innerjoin(t_us_factors,var_codes_us_factors,'Keys','Code');
 
-    if strcmp(source,'oecd')
+    if ismember(source,{'oecd','oecd2025e'}) 
         t_us_factors.Code_std_20(strcmp(t_us_factors.Code_std_20,'Wholesale')) = {'WholesaleAndRetail'};
         t_us_factors.Code_std_20(strcmp(t_us_factors.Code_std_20,'Retail')) = {'WholesaleAndRetail'};
     end

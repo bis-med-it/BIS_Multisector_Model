@@ -2,10 +2,10 @@
 // @#define nsector = 20
 // @#define n_ait_loop = 1
 
-@#include "utility\variables.m"
-@#include "utility\variables_exo.m"
+@#include "utility/variables.m"
+@#include "utility/variables_exo.m"
 
-@#include "utility\parameters.m"
+@#include "utility/parameters.m"
 
 verbatim;
 
@@ -263,9 +263,9 @@ sig_mm                   = d_sig_mm;
 
 // ========================================================================
 
-@#include "utility\equations_combined.mod"
+@#include "utility/equations_combined.mod"
 
-steady ;
+//steady ;
 
 shocks;
 var eps_g; stderr 0 ;
@@ -284,4 +284,4 @@ end ;
 
 write_latex_dynamic_model;
 
-stoch_simul(order=1, irf = 20, nomoments, nofunctions, nocorr, nodecomposition, nograph) ;
+stoch_simul(order=1, irf = 0, nomoments, nofunctions, nocorr, nodecomposition, nograph, noprint) ;
