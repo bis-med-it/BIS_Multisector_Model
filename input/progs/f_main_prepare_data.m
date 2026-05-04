@@ -17,7 +17,8 @@ function [io, empl] = f_main_prepare_data(folder_path, iso2, source)
 % - `f_iso2_to_adbmrio.m`: Converts ISO-2 codes to ADB MRIO codes.
 % - `f_setup_bea.m`: Processes US BEA IO data.
 % - `f_setup_oecd.m`: Processes OECD ICIO data.
-% - `f_iso2_to_oecdicio.m`: Converts ISO-2 codes to OECD ICIO codes.
+% - `f_setup_oecd2025e.m`: Processes OECD ICIO (2025 edition) data.
+% - `f_iso2_to_oecdicio.m`: Converts ISO-2 codes to OECD ICIO (for both 20233 and 2025 editions) codes.
 % - `f_factor_shares.m`: Computes factor shares (labour and capital).
 % - `f_setup_employment_shares.m`: Computes employment shares by industry.
 % -------------------------------------------------------------------------
@@ -40,8 +41,8 @@ else
     %% 2 Generate `.mat' files from raw data
 
     % 2.1 Folders
-    restoredefaultpath; 
-    % Restore the MATLAB default path to avoid conflicts with commands 
+    restoredefaultpath;
+    % Restore the MATLAB default path to avoid conflicts with commands
     % that might mistakenly use functions or files from the Dynare path.
     cd(folder_path); addpath(genpath(folder_path));
 
@@ -51,6 +52,7 @@ else
     file_adb = fullfile(folder_path, 'input', 'data', 'ADB-MRIO62-2019_Dec2022.xlsx');
     file_us_bea = fullfile(folder_path, 'input', 'data', 'US_Input_Output_Detail_2019.xlsx');
     file_oecd = fullfile(folder_path, 'input', 'data', 'ICIO2023_2019.csv');
+    file_oecd2025e = fullfile(folder_path, 'input', 'data', 'ICIO2025edition_2019.csv');
     file_bls_emp = fullfile(folder_path, 'input', 'data', 'emp2022.csv');
 
     % 2.2.2 File used to map industries in raw tables to broader, standardised industries
@@ -60,7 +62,7 @@ else
     warning('off','all')
 
     %% 3 Process raw data into standardised format
-    if ismember(source,{'adb','bea','oecd'})
+    if ismember(source,{'adb','bea','oecd','oecd2025e'})
         fprintf('-------------------\n\n Loading raw data ... \n\n');
 
         % Load employment data
@@ -117,7 +119,20 @@ else
 
         fprintf(' Input files are ready. Proceeding to the next step...\n\n'); pause(5);
         fprintf('-------------------\n\n');
-        
+
+    elseif strcmp(source,'oecd2025e')
+
+        % Load data
+        fprintf('-------------------\n\n 2 Loading OECD ICIO 2025 edition (estimated runtime: 2 minutes) ... \n');
+        io_raw = readcell(file_oecd2025e);
+        io_raw(cellfun(@(x) any(ismissing(x)), io_raw)) = {''};
+
+        % Process
+        io = f_setup_oecd2025e(folder_path, mapping_file, source, iso2, io_raw);
+        empl = f_setup_employment_shares(folder_path, mapping_file, source, iso2, t_empl);
+
+        fprintf(' Input files are ready. Proceeding to the next step...\n\n'); pause(5);
+        fprintf('-------------------\n\n');
     else
         fprintf("-------------------\n\n Source not found.\n");
     end
@@ -127,6 +142,7 @@ else
     % Set warnings back to `on'
     warning('on','all')
 
+end
 end
 
 

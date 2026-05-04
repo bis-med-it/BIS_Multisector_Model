@@ -8,14 +8,14 @@ function scenario_path = scenario_multiple(oo_,M_,out,horizon,exonum,exo_nbr,...
 
 % Check sizes
 numvars = size(targetpath,1);
-numshks = size(exonum,2);
+numshks = numel(exonum);
 mats    = out.mats ;
 
 % Compute IRF to the desired shock
 e1            = zeros(exo_nbr,1,numshks);
 for jj = 1 : numshks
 e1(exonum(jj),1,jj) = 1; % Select the exogenous shock
-y(:,:,jj)           = irf_func(oo_, mats, e1, horizon, bypass_Callum);       % Compute IRF
+y(:,:,jj)           = irf_func(oo_, mats, e1(:,:,jj), horizon, bypass_Callum);       % Compute IRF
 scalefac(:,jj)      = y(targetnum,1,jj);                       % Scale shock to get one unit change in target variable
 end
 
