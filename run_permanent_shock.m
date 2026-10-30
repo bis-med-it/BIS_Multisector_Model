@@ -83,11 +83,11 @@ M__baseline = M_;
 SET_baseline = SET;
 
 %% Find the country-specific shock parameter value to pass
-min_target_name = {'tau_c_(2)'};
+min_target_name = {sprintf('tau_c_(%d)', find(strcmp(io.industry_names, 'Mining'), 1))};
 min_target_value = 0.25;
-fun = @(x)golden_search(selected_targets{1},x,SET_baseline, min_target_value, min_target_name);
+fun = @(x)golden_search(x,SET_baseline, min_target_value, min_target_name);
 x_end = fminbnd(fun,0.0000001,2.0);
-res_dist = golden_search(selected_targets{1},x_end,SET_baseline, min_target_value, min_target_name);
+res_dist = golden_search(x_end,SET_baseline, min_target_value, min_target_name);
 permanent_shock_value = x_end;
 
 
@@ -165,12 +165,12 @@ for exercise_ = 1:length(exercises_fields)
     param = SET.param;
     %param.a_ss_(2) = param.a_ss_(2) / 2;   % Halve TFP in sector 2
     % a_ss_2_initialvalue = param.a_ss_(2);
-    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"2_initialvalue = param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(2);"));
-    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"2_finalvalue = param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(2)+", num2str(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock_value"))),";"));  % Final value in line with a 15% in relative prices in long run.
+    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Mining'),1)),"_initialvalue = param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(find(strcmp(io.industry_names,'Mining'),1));"));
+    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Mining'),1)),"_finalvalue = param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(find(strcmp(io.industry_names,'Mining'),1))+",num2str(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock_value"))),";"));  % Final value in line with a 15% increase in relative prices in the long run.
 
     c_para = eval(strcat("exercises.",char(exercises_fields(exercise_)),".values(1)"));
-    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"5_initialvalue = param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(5);"));
-    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"5_finalvalue = param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(5)+ (",num2str(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock_value"))),"*c_para);"));  % Set to c_para to 0 in case of no spillovers
+    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Manufacturing'),1)),"_initialvalue = param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(find(strcmp(io.industry_names,'Manufacturing'),1));"));
+    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Manufacturing'),1)),"_finalvalue = param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(find(strcmp(io.industry_names,'Manufacturing'),1)) + (",num2str(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock_value"))),"*c_para);"));  % Set c_para to 0 in case of no spillovers
 
     % MP rule
     % eval(strcat("param.", eval(strcat("exercises.",char(exercises_fields(exercise_)),".names{2}")), "= exercises.",char(exercises_fields(exercise_)),".values(2);"));
@@ -179,8 +179,8 @@ for exercise_ = 1:length(exercises_fields)
         eval(strcat("param.", eval(strcat("exercises.",char(exercises_fields(exercise_)),".names{",num2str(it_),"}")), "= exercises.",char(exercises_fields(exercise_)),".values(",num2str(it_),");"));
     end
 
-    eval(strcat("param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(2) =  ",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"2_finalvalue;"));   % Adjust TFP in sector 2
-    eval(strcat("param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(5) =  ",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"5_finalvalue;"));   % Adjust TFP in sector 5
+    eval(strcat("param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(find(strcmp(io.industry_names,'Mining'),1)) = ",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Mining'),1)),"_finalvalue;"));  % Adjust TFP in the Mining sector
+    eval(strcat("param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(find(strcmp(io.industry_names,'Manufacturing'),1)) = ",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Manufacturing'),1)),"_finalvalue;"));  % Adjust TFP in the Manufacturing sector
     transition_matrices_calculation  % File calculates the new matrices
 
     B_temp = B_new;
@@ -210,13 +210,13 @@ for exercise_ = 1:length(exercises_fields)
     l_   = M_.exo_nbr;
 
 
-    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"2_transitionvec = linspace(",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"2_finalvalue,",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"2_initialvalue,T_b-T_a+2);"));
-    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"5_transitionvec = linspace(",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"5_finalvalue,",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"5_initialvalue,T_b-T_a+2);"));
-    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"2_transitionvec2 = linspace(",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"2_finalvalue,",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"2_initialvalue,T_c-T_a+2);"));
-    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"5_transitionvec2 = linspace(",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"5_finalvalue,",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"5_initialvalue,T_c-T_a+2);"));
-    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"2_transitionvec2 = [repmat(",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"2_finalvalue, 1, extra_inertia), ",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"2_transitionvec2];"));
-    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"5_transitionvec2 = [repmat(",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"5_finalvalue, 1, extra_inertia), ",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"5_transitionvec2];"));
-
+    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Mining'),1)),"_transitionvec = linspace(",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Mining'),1)),"_finalvalue,",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Mining'),1)),"_initialvalue,T_b-T_a+2);"));
+    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Manufacturing'),1)),"_transitionvec = linspace(",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Manufacturing'),1)),"_finalvalue,",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Manufacturing'),1)),"_initialvalue,T_b-T_a+2);"));
+    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Mining'),1)),"_transitionvec2 = linspace(",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Mining'),1)),"_finalvalue,",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Mining'),1)),"_initialvalue,T_c-T_a+2);"));
+    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Manufacturing'),1)),"_transitionvec2 = linspace(",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Manufacturing'),1)),"_finalvalue,",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Manufacturing'),1)),"_initialvalue,T_c-T_a+2);"));
+    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Mining'),1)),"_transitionvec2 = [repmat(",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Mining'),1)),"_finalvalue, 1, extra_inertia), ",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Mining'),1)),"_transitionvec2];"));
+    eval(strcat(eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Manufacturing'),1)),"_transitionvec2 = [repmat(",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Manufacturing'),1)),"_finalvalue, 1, extra_inertia), ",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Manufacturing'),1)),"_transitionvec2];"));
+    
 
     Q_tv = zeros(n_bp, n_bp, horizon);
     G_tv = zeros(n_bp, l_, horizon);
@@ -230,8 +230,8 @@ for exercise_ = 1:length(exercises_fields)
     for t_ = T_b - 1 : -1 : T_a
 
 
-        eval(strcat("param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(2) =  ",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"2_transitionvec(iii);"));   % Adjust TFP in sector 2
-        eval(strcat("param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(5) =  ",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"5_transitionvec(iii);"));   % Adjust TFP in sector 2
+        eval(strcat("param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(find(strcmp(io.industry_names,'Mining'),1)) = ",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Mining'),1)),"_transitionvec(iii);"));  % Adjust TFP in the Mining sector
+        eval(strcat("param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(find(strcmp(io.industry_names,'Manufacturing'),1)) = ",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Manufacturing'),1)),"_transitionvec(iii);"));  % Adjust TFP in the Manufacturing sector
         transition_matrices_calculation  % File calculates the new matrices
 
         B_temp = B_new;
@@ -240,8 +240,8 @@ for exercise_ = 1:length(exercises_fields)
         Q_temp = Q_new;
 
         if extra_inertia > 1
-            eval(strcat("param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(2) =  ",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"2_transitionvec2(iii);"));   % Adjust TFP in sector 2
-            eval(strcat("param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(5) =  ",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"5_transitionvec2(iii);"));   % Adjust TFP in sector 2
+            eval(strcat("param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(find(strcmp(io.industry_names,'Mining'),1)) = ",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Mining'),1)),"_transitionvec2(iii);"));  % Adjust TFP in the Mining sector
+            eval(strcat("param.",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),"(find(strcmp(io.industry_names,'Manufacturing'),1)) = ",eval(strcat("exercises.",char(exercises_fields(exercise_)),".permanent_shock")),num2str(find(strcmp(io.industry_names,'Manufacturing'),1)),"_transitionvec2(iii);"));  % Adjust TFP in the Manufacturing sector
             transition_matrices_calculation  % File calculates the new matrices
             B_temp = B_new;
             A_temp = A_new;
